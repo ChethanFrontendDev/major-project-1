@@ -36,6 +36,29 @@ app.post("/featuredCategories", async (req, res) => {
   }
 });
 
+async function readAllFeaturedCategory() {
+  try {
+    const featuredCategoryList = await FeaturedCategoryList.find();
+    return featuredCategoryList;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get("/featuredCategories", async (req, res) => {
+  try {
+    const readFeaturedCategoryList = await readAllFeaturedCategory();
+
+    if (readFeaturedCategoryList.length !== 0) {
+      res.json(readFeaturedCategoryList);
+    } else {
+      res.status(404).json({ error: "featured category not found. " });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch featured category. " });
+  }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
