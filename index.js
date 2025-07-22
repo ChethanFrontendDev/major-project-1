@@ -1,6 +1,14 @@
 const FeaturedCategoryList = require("./models/featuredCategoriesList.models");
 const { initializeDatabse } = require("./db/db.connect");
 const express = require("express");
+
+const cors = require("cors");
+const corsOptions = {
+  origin: "*",
+  credentials: true,
+};
+app.use(cors(corsOptions))
+
 const app = express();
 
 app.use(express.json());
