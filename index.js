@@ -107,13 +107,16 @@ async function readProductsByName(featuredCategoryName) {
   }
 }
 
+const normalizeText = (text) => text.replace(/’/g, "'"); // convert curly to straight apostrophe
+
 app.get(
   "/featuredCategories/products/:featuredCategoryName",
   async (req, res) => {
     try {
-      const readProducts = await readProductsByName(
-        req.params.featuredCategoryName
-      );
+      const rawParam = req.params.featuredCategoryName;
+      const featuredCategoryName = normalizeText(rawParam);
+
+      const readProducts = await readProductsByName(featuredCategoryName);
 
       if (readProducts && readProducts.length > 0) {
         res.json(readProducts);
