@@ -96,6 +96,28 @@ app.post("/featuredCategories/products/", async (req, res) => {
   }
 });
 
+async function readAllProductsData() {
+  try {
+    const readAllProducts = await ProductsData.find();
+    return readAllProducts;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get("/featuredCategories/products/", async (req, res) => {
+  try {
+    const readallProducts = await readAllProductsData();
+    if (readallProducts && readallProducts.length > 0) {
+      res.json(readallProducts);
+    } else {
+      res.status(404).json({ error: "Product does not exist." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get all products" });
+  }
+});
+
 async function readProductsByName(featuredCategoryName) {
   try {
     const products = await ProductsData.find({
