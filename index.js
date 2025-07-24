@@ -129,6 +129,41 @@ app.get(
   }
 );
 
+async function updateProductById(productId, dataToUpdate) {
+  try {
+    const updateProduct = await ProductsData.findByIdAndUpdate(
+      productId,
+      dataToUpdate,
+      { new: true }
+    );
+    return updateProduct;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.post(
+  "/featuredCategories/products/:featuredCategoryName/:productId",
+  async (req, res) => {
+    try {
+      const updatedProduct = await updateProductById(
+        req.params.productId,
+        req.body
+      );
+      if (updatedProduct) {
+        res.status(200).json({
+          message: "Product updated successfully.",
+          product: updatedProduct,
+        });
+      } else {
+        res.status(404).json({ error: "Product does not exist." });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update add to cart status." });
+    }
+  }
+);
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
