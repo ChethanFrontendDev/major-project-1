@@ -129,6 +129,31 @@ app.get(
   }
 );
 
+async function readProductsById(productId) {
+  try {
+    const readProducts = await ProductsData.findById(productId);
+    return readProducts;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get(
+  "/featuredCategories/products/:featuredCategoryName/:productId",
+  async (req, res) => {
+    try {
+      const readProducts = await readProductsById(req.params.productId);
+      if (readProducts) {
+        res.json(readProducts);
+      } else {
+        res.status(404).json({ error: "Product not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed fetch products by id." });
+    }
+  }
+);
+
 async function updateProductById(productId, dataToUpdate) {
   try {
     const updateProduct = await ProductsData.findByIdAndUpdate(
