@@ -267,6 +267,75 @@ app.get("/profile", async (req, res) => {
   }
 });
 
+async function updateUserAddress(userId, addressId, dataToUpdate) {
+  try {
+    const updateAddress = await UserDetails.findOneAndUpdate(
+      { _id: userId, "address._id": addressId },
+      {
+        $set: {
+          "address.$.fullName": dataToUpdate.fullName,
+          "address.$.phoneNumber": dataToUpdate.phoneNumber,
+          "address.$.addressLine": dataToUpdate.addressLine,
+          "address.$.landMark": dataToUpdate.landMark,
+          "address.$.zipCode": dataToUpdate.zipCode,
+        },
+      },
+      { new: true }
+    );
+    return updateAddress;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.post("/profile/user/:userId/address/:addressId", async (req, res) => {
+  try {
+    const updatedAddress = await updateUserAddress(
+      req.params.userId,
+      req.params.addressId,
+      req.body
+    );
+
+    if (updatedAddress) {
+      res.status(200).json({
+        message: "user address updated successfully.",
+        userAddress: updatedAddress,
+      });
+    } else {
+      res.status(404).json({ error: "user does not exist." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update user address." });
+  }
+});
+
+async function appendUserAddress(userId, newAddress) {
+  try {
+    const appendAddress = await UserDetails.findByIdAndUpdate(
+      userId,
+      { $push: { address: newAddress } },
+      { new: true }
+    );
+    return appendAddress;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.post("/profile/user/:userId/address", async (req, res) => {
+  try {
+    const appendAddress = await appendUserAddress(req.params.userId, req.body)
+    
+    if(appendAddress){
+      res.status(200).json({message: "Address added successfully.", address: appendAddress})
+    } else {
+      res.status(404).json({error: "address not found."})
+    }
+  } catch (error) {
+    res.status(500).json({error: "Failed to append user address."})
+  }
+})
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
