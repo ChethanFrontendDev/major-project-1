@@ -324,17 +324,49 @@ async function appendUserAddress(userId, newAddress) {
 
 app.post("/profile/user/:userId/address", async (req, res) => {
   try {
-    const appendAddress = await appendUserAddress(req.params.userId, req.body)
-    
-    if(appendAddress){
-      res.status(200).json({message: "Address added successfully.", address: appendAddress})
+    const appendAddress = await appendUserAddress(req.params.userId, req.body);
+
+    if (appendAddress) {
+      res.status(200).json({
+        message: "Address added successfully.",
+        address: appendAddress,
+      });
     } else {
-      res.status(404).json({error: "address not found."})
+      res.status(404).json({ error: "address not found." });
     }
   } catch (error) {
-    res.status(500).json({error: "Failed to append user address."})
+    res.status(500).json({ error: "Failed to append user address." });
   }
-})
+});
+
+async function deleteAddressById(userId, addressId) {
+  try {
+    const deleteAddress = await UserDetails.updateOne(
+      { _id: userId },
+      { $pull: { address: { _id: addressId } } }
+    );
+    return deleteAddress;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.delete("/profile/user/:userId/address/:addressId", async (req, res) => {
+  try {
+    const deletedAddress = await deleteAddressById(
+      req.params.userId,
+      req.params.addressId
+    );
+
+    if (deletedAddress.modifiedCount > 0) {
+      res.status(200).json({ message: "address deleted successfully." });
+    } else {
+      res.status(404).json({ error: "Address not found." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete address." });
+  }
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
