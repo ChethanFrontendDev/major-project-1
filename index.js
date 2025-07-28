@@ -124,7 +124,7 @@ app.get("/featuredCategories/products/", async (req, res) => {
   }
 });
 
-async function readProductsByName(featuredCategoryName) {
+async function readProductsByFeaturedCategoryName(featuredCategoryName) {
   try {
     const products = await ProductsData.find({
       featuredCategory: featuredCategoryName,
@@ -144,7 +144,9 @@ app.get(
       const rawParam = req.params.featuredCategoryName;
       const featuredCategoryName = normalizeText(rawParam);
 
-      const readProducts = await readProductsByName(featuredCategoryName);
+      const readProducts = await readProductsByFeaturedCategoryName(
+        featuredCategoryName
+      );
 
       if (readProducts && readProducts.length > 0) {
         res.json(readProducts);
@@ -153,6 +155,34 @@ app.get(
       }
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch products." });
+    }
+  }
+);
+
+async function readProductsByName(productName) {
+  try {
+    const readProducts = await ProductsData.find({
+      productName: {$regex: productName, $options: "i"}
+    });
+    return readProducts;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get(
+  "/featuredCategories/products/:featuredCategoryName/name/:productName",
+  async (req, res) => {
+    try {
+      const readProducts = await readProductsByName(req.params.productName);
+
+      if (readProducts) {
+        res.json(readProducts);
+      } else {
+        res.status(404).json({ error: "Product not found by name." });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch products by name." });
     }
   }
 );
@@ -167,7 +197,7 @@ async function readProductsById(productId) {
 }
 
 app.get(
-  "/featuredCategories/products/:featuredCategoryName/:productId",
+  "/featuredCategories/products/:featuredCategoryName/id/:productId",
   async (req, res) => {
     try {
       const readProducts = await readProductsById(req.params.productId);
@@ -417,7 +447,7 @@ app.get("/featuredCategories/placedOrders", async (req, res) => {
       res.status(404).json({ error: "Order does not exist." });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to get order list." });
   }
 });
 
