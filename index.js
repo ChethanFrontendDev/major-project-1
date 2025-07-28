@@ -1,6 +1,7 @@
 const FeaturedCategoryList = require("./models/featuredCategoriesList.models");
 const ProductsData = require("./models/productsData.models");
 const UserDetails = require("./models/userDetails.models");
+const OrderPlaced = require("./models/orderPlaced.models");
 const { initializeDatabase } = require("./db/db.connect");
 const express = require("express");
 const app = express();
@@ -365,6 +366,58 @@ app.delete("/profile/user/:userId/address/:addressId", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to delete address." });
+  }
+});
+
+// !Order Placed
+
+async function createOrderList(placedOrder) {
+  try {
+    const newOrderList = new OrderPlaced(placedOrder);
+    const saveOrderList = await newOrderList.save();
+    return saveOrderList;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.post("/featuredCategories/placedOrders", async (req, res) => {
+  try {
+    const savedOrdersData = await createOrderList(req.body);
+
+    if (savedOrdersData) {
+      res.status(200).json({
+        message: "Order placed successfully.",
+        products: savedOrdersData,
+      });
+    } else {
+      res.status(404).json({ error: "Placed order not found." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Failed to place an order." });
+  }
+});
+
+async function readAllOrders() {
+  try {
+    const readOrders = await OrderPlaced.find();
+    return readOrders;
+  } catch (error) {
+    throw error;
+  }
+}
+
+app.get("/featuredCategories/placedOrders", async (req, res) => {
+  try {
+    const readSavedOrders = await readAllOrders();
+
+    if (readSavedOrders.length > 0) {
+      res.json(readSavedOrders);
+    } else {
+      res.status(404).json({ error: "Order does not exist." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

@@ -79,10 +79,6 @@ const ProductsDataSchema = new mongoose.Schema(
     description: {
       type: [String],
     },
-    deliveryCharges: {
-      type: Number,
-      required: true,
-    },
   },
   { timestamps: true }
 );
